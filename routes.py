@@ -14,6 +14,24 @@ logger = logging.getLogger(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/download_sample')
+def download_sample():
+    """Download a sample Excel file to show users the expected format"""
+    try:
+        sample_file_path = 'sample_images.xlsx'
+        if os.path.exists(sample_file_path):
+            return send_file(
+                sample_file_path,
+                as_attachment=True,
+                download_name='sample_excel_format.xlsx',
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+        else:
+            return jsonify({'error': 'Sample file not found'}), 404
+    except Exception as e:
+        logger.error(f"Sample download error: {str(e)}")
+        return jsonify({'error': 'Failed to download sample file'}), 500
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:

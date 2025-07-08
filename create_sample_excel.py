@@ -15,11 +15,25 @@ def create_sample_excel():
     ws.title = "Sample Image Data"
     
     # Create headers
-    headers = ['ID', 'Product Name', 'Image URL', 'Alt Text', 'Category', 'Price']
+    headers = ['ID', 'Product Name', 'image_url', 'alt_text', 'Category', 'Price']
     for col, header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col, value=header)
         cell.font = Font(bold=True)
         cell.fill = PatternFill(start_color="E8F5E8", end_color="E8F5E8", fill_type="solid")
+    
+    # Add instruction row
+    instruction_row = [
+        "Sample ID", 
+        "Your product name", 
+        "REQUIRED: Put your image URLs here", 
+        "OPTIONAL: Leave empty to generate with AI", 
+        "Any additional data", 
+        "Any additional data"
+    ]
+    for col, instruction in enumerate(instruction_row, 1):
+        cell = ws.cell(row=2, column=col, value=instruction)
+        cell.font = Font(italic=True, color="666666")
+        cell.fill = PatternFill(start_color="F8F8F8", end_color="F8F8F8", fill_type="solid")
     
     # Sample data with real image URLs from various sources
     sample_data = [
@@ -35,8 +49,8 @@ def create_sample_excel():
         [10, "Laptop Computer", "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800", "", "Technology", "$1,299.99"]
     ]
     
-    # Add sample data to worksheet
-    for row_idx, row_data in enumerate(sample_data, 2):
+    # Add sample data to worksheet (starting from row 3 now)
+    for row_idx, row_data in enumerate(sample_data, 3):
         for col_idx, value in enumerate(row_data, 1):
             ws.cell(row=row_idx, column=col_idx, value=value)
     
