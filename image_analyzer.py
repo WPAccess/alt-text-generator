@@ -4,13 +4,14 @@ import base64
 import tempfile
 from PIL import Image
 import logging
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 logger = logging.getLogger(__name__)
 
 class ImageAnalyzer:
     def __init__(self):
-        self.openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        self.gemini_client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
     
     def generate_alt_text(self, image_url):
         """Generate SEO-friendly alt text for an image URL"""
@@ -20,11 +21,8 @@ class ImageAnalyzer:
             if not image_data:
                 raise ValueError("Failed to download image")
             
-            # Convert to base64
-            base64_image = base64.b64encode(image_data).decode('utf-8')
-            
-            # Generate alt text using OpenAI Vision API
-            alt_text = self._generate_with_openai(base64_image)
+            # Generate alt text using Gemini Vision API
+            alt_text = self._generate_with_gemini(image_data)
             
             return alt_text
             
@@ -77,46 +75,40 @@ class ImageAnalyzer:
             logger.error(f"Error processing image: {str(e)}")
             raise ValueError(f"Failed to process image: {str(e)}")
     
-    def _generate_with_openai(self, base64_image):
-        """Generate alt text using OpenAI Vision API"""
+    def _generate_with_gemini(self, image_data):
+        """Generate alt text using Gemini Vision API"""
         try:
-            # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
+            # Create system instruction for SEO-friendly alt text
+            system_instruction = """You are an expert at creating SEO-friendly alt text for images. 
+            Your alt text should be:
+            - Descriptive and specific
+            - Concise (under 125 characters)
+            - SEO-friendly with relevant keywords
+            - Accessible for screen readers
+            - Professional and natural sounding
+            
+            Focus on the main subject, important details, context, and any text visible in the image.
+            Do not start with "Image of" or "Picture of" - just describe what you see directly."""
+            
+            # Note that the newest Gemini model series is "gemini-2.5-flash" or "gemini-2.5-pro"
             # do not change this unless explicitly requested by the user
-            response = self.openai_client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": """You are an expert at creating SEO-friendly alt text for images. 
-                        Your alt text should be:
-                        - Descriptive and specific
-                        - Concise (under 125 characters)
-                        - SEO-friendly with relevant keywords
-                        - Accessible for screen readers
-                        - Professional and natural sounding
-                        
-                        Focus on the main subject, important details, context, and any text visible in the image.
-                        Do not start with "Image of" or "Picture of" - just describe what you see directly."""
-                    },
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": "Generate SEO-friendly alt text for this image:"
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
-                            }
-                        ]
-                    }
+            response = self.gemini_client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[
+                    types.Part.from_bytes(
+                        data=image_data,
+                        mime_type="image/jpeg",
+                    ),
+                    "Generate SEO-friendly alt text for this image. Keep it under 125 characters, descriptive, and professional."
                 ],
-                max_tokens=150,
-                temperature=0.3
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    max_output_tokens=150,
+                    temperature=0.3
+                )
             )
             
-            alt_text = response.choices[0].message.content.strip()
+            alt_text = response.text.strip() if response.text else ""
             
             # Ensure alt text is not too long
             if len(alt_text) > 125:
@@ -125,5 +117,5 @@ class ImageAnalyzer:
             return alt_text
             
         except Exception as e:
-            logger.error(f"OpenAI API error: {str(e)}")
+            logger.error(f"Gemini API error: {str(e)}")
             raise ValueError(f"Failed to generate alt text: {str(e)}")

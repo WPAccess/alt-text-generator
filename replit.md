@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Flask-based web application that processes Excel files containing image URLs and generates SEO-friendly alt text using OpenAI's Vision API. The application allows users to upload Excel files, automatically detect missing alt text, and generate descriptive alt text for images using AI.
+This is a Flask-based web application that processes Excel files containing image URLs and generates SEO-friendly alt text using Google's Gemini AI Vision API. The application allows users to upload Excel files, automatically detect missing alt text, and generate descriptive alt text for images using AI.
 
 ## System Architecture
 
@@ -10,7 +10,7 @@ This is a Flask-based web application that processes Excel files containing imag
 - **Framework**: Flask (Python web framework)
 - **File Processing**: Uses openpyxl for Excel file manipulation
 - **Image Processing**: PIL (Python Imaging Library) for image validation and processing
-- **AI Integration**: OpenAI Vision API for alt text generation
+- **AI Integration**: Google Gemini AI Vision API for alt text generation
 - **File Storage**: Local filesystem for temporary file storage
 
 ### Frontend Architecture
@@ -37,7 +37,7 @@ This is a Flask-based web application that processes Excel files containing imag
 - **ImageAnalyzer Class**: Manages AI-powered alt text generation
 - **Image Download**: Fetches images from URLs with proper headers
 - **Format Validation**: Ensures downloaded content is valid image format
-- **OpenAI Integration**: Uses GPT-4 Vision API to generate descriptive alt text
+- **Gemini Integration**: Uses Google's Gemini AI Vision API to generate descriptive alt text
 
 ### 4. Web Routes (`routes.py`)
 - **File Upload**: Handles Excel file uploads with validation
@@ -56,7 +56,7 @@ This is a Flask-based web application that processes Excel files containing imag
 1. **File Upload**: User uploads Excel file (.xlsx format)
 2. **File Processing**: System reads Excel file and identifies image URL columns
 3. **Data Extraction**: Extract image URLs and existing alt text data
-4. **Image Analysis**: Download images and generate alt text using OpenAI Vision API
+4. **Image Analysis**: Download images and generate alt text using Google Gemini AI Vision API
 5. **Data Update**: Update Excel file with generated alt text
 6. **File Download**: Provide processed Excel file for download
 
@@ -67,14 +67,14 @@ This is a Flask-based web application that processes Excel files containing imag
 - **openpyxl**: Excel file processing
 - **PIL (Pillow)**: Image processing and validation
 - **requests**: HTTP requests for image downloading
-- **openai**: OpenAI API integration
+- **google-genai**: Google Gemini AI API integration
 
 ### Frontend Dependencies
 - **Bootstrap**: CSS framework (via CDN)
 - **Font Awesome**: Icon library (via CDN)
 
 ### Environment Variables
-- **OPENAI_API_KEY**: Required for AI-powered alt text generation
+- **GEMINI_API_KEY**: Required for AI-powered alt text generation
 - **SESSION_SECRET**: Optional, defaults to development key
 
 ## Deployment Strategy
@@ -100,7 +100,8 @@ This is a Flask-based web application that processes Excel files containing imag
 ```
 
 ## Changelog
-- July 08, 2025. Initial setup
+- July 08, 2025. Initial setup with OpenAI Vision API
+- July 08, 2025. Switched from OpenAI to Google Gemini AI for alt text generation
 
 ## User Preferences
 
