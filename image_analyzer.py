@@ -43,7 +43,10 @@ class ImageAnalyzer:
             # Validate image format
             content_type = response.headers.get('content-type', '')
             if not content_type.startswith('image/'):
-                raise ValueError(f"Invalid content type: {content_type}")
+                if 'text/html' in content_type:
+                    raise ValueError(f"URL points to a webpage, not an image. Please use direct image URLs (e.g., https://images.unsplash.com/photo-xxx)")
+                else:
+                    raise ValueError(f"Invalid content type: {content_type}. Expected image, got {content_type}")
             
             # Process image with PIL to ensure it's valid
             image_data = response.content
@@ -57,12 +60,12 @@ class ImageAnalyzer:
                     if img.mode not in ('RGB', 'RGBA'):
                         img = img.convert('RGB')
                     
-                    # Resize if too large (OpenAI has limits)
+                    # Resize if too large (Gemini has limits)
                     max_size = 2048
                     if img.width > max_size or img.height > max_size:
                         img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
                     
-                    # Save as JPEG for OpenAI
+                    # Save as JPEG for Gemini
                     with tempfile.NamedTemporaryFile(suffix='.jpg') as output_file:
                         img.save(output_file.name, 'JPEG', quality=85)
                         output_file.seek(0)

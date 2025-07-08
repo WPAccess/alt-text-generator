@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Create a comprehensive sample Excel file with instructions
+Create a sample Excel file with working image URLs
 """
 
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.styles import Font, PatternFill
 
-def create_sample_with_instructions():
-    """Create a sample Excel file with detailed instructions"""
+def create_working_sample():
+    """Create a sample Excel file with working image URLs"""
     
     # Create a new workbook
     wb = openpyxl.Workbook()
@@ -38,7 +38,8 @@ def create_sample_with_instructions():
         ["4. You can include any other columns with additional data", "", "", ""],
         ["", "", "", ""],
         ["IMPORTANT: Use direct image URLs, not webpage URLs", "", "", ""],
-        ["✓ Good: https://images.unsplash.com/photo-xxx?w=800", "", "", ""],
+        ["✓ Good: https://picsum.photos/800/600", "", "", ""],
+        ["✓ Good: https://via.placeholder.com/800x600", "", "", ""],
         ["✗ Bad: https://unsplash.com/photos/photo-name-xxx", "", "", ""],
         ["", "", "", ""],
         ["5. The tool will:", "", "", ""],
@@ -65,6 +66,12 @@ def create_sample_with_instructions():
             elif value.startswith("   -"):  # Sub-points
                 cell.font = Font(italic=True)
                 cell.fill = PatternFill(start_color="F8F8F8", end_color="F8F8F8", fill_type="solid")
+            elif value.startswith("✓"):  # Good examples
+                cell.font = Font(color="006600")
+                cell.fill = PatternFill(start_color="E8F5E8", end_color="E8F5E8", fill_type="solid")
+            elif value.startswith("✗"):  # Bad examples
+                cell.font = Font(color="CC0000")
+                cell.fill = PatternFill(start_color="FFE8E8", end_color="FFE8E8", fill_type="solid")
     
     # Create Sample Data sheet
     sample_ws = wb.create_sheet("Sample Data")
@@ -77,16 +84,16 @@ def create_sample_with_instructions():
         cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
         cell.font = Font(bold=True, color="FFFFFF")
     
-    # Sample data with direct image URLs
+    # Sample data with working image URLs
     sample_data = [
-        [1, "Red Sports Car", "https://images.unsplash.com/photo-1494976688153-018c804d0dd7?w=800&auto=format&fit=crop", "", "Automotive", "$45,000"],
-        [2, "Mountain Landscape", "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop", "Beautiful mountain scenery with snow-capped peaks", "Nature", "N/A"],
-        [3, "Coffee Cup", "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=800&auto=format&fit=crop", "", "Food & Drink", "$12.99"],
-        [4, "Modern Office", "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop", "", "Architecture", "N/A"],
-        [5, "Golden Retriever", "https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&auto=format&fit=crop", "", "Animals", "N/A"],
-        [6, "Fresh Vegetables", "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&auto=format&fit=crop", "Colorful fresh vegetables including tomatoes, peppers, and leafy greens", "Food", "$8.50"],
-        [7, "City Skyline", "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&auto=format&fit=crop", "", "Urban", "N/A"],
-        [8, "Yoga Class", "https://images.unsplash.com/photo-1506629905117-b5d1b8b6c4e5?w=800&auto=format&fit=crop", "", "Health & Wellness", "$25.00"],
+        [1, "Random Nature Image", "https://picsum.photos/800/600?random=1", "", "Nature", "$25.00"],
+        [2, "Technology Product", "https://picsum.photos/800/600?random=2", "Modern technology device on clean background", "Technology", "$199.99"],
+        [3, "Abstract Art", "https://picsum.photos/800/600?random=3", "", "Art", "$89.50"],
+        [4, "Architecture Photo", "https://picsum.photos/800/600?random=4", "", "Architecture", "N/A"],
+        [5, "Landscape View", "https://picsum.photos/800/600?random=5", "", "Nature", "N/A"],
+        [6, "Urban Scene", "https://picsum.photos/800/600?random=6", "Busy city street with modern buildings", "Urban", "$15.00"],
+        [7, "Portrait Photography", "https://picsum.photos/800/600?random=7", "", "Portrait", "$45.00"],
+        [8, "Food Photography", "https://picsum.photos/800/600?random=8", "", "Food", "$12.99"],
     ]
     
     # Add sample data to worksheet
@@ -112,7 +119,7 @@ def create_sample_with_instructions():
     # Save the file
     filename = "sample_images.xlsx"
     wb.save(filename)
-    print(f"Enhanced sample Excel file created: {filename}")
+    print(f"Working sample Excel file created: {filename}")
     
     # Print statistics
     total_rows = len(sample_data)
@@ -122,4 +129,4 @@ def create_sample_with_instructions():
     print(f"Rows with existing alt text: {total_rows - missing_alt_text}")
 
 if __name__ == "__main__":
-    create_sample_with_instructions()
+    create_working_sample()

@@ -100,6 +100,9 @@ class ExcelProcessor:
     def get_image_url(self, row_index):
         """Get image URL for a specific row"""
         try:
+            if not self.worksheet or not self.image_url_column:
+                logger.error(f"Worksheet or image_url_column not initialized")
+                return None
             return self.worksheet.cell(row=row_index, column=self.image_url_column).value
         except Exception as e:
             logger.error(f"Error getting image URL for row {row_index}: {str(e)}")
