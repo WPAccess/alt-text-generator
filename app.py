@@ -7,7 +7,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Create the Flask app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
+session_secret = os.environ.get("SESSION_SECRET")
+if not session_secret:
+    raise RuntimeError("SESSION_SECRET environment variable is required for security")
+app.secret_key = session_secret
 
 # Configure upload settings
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
