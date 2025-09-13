@@ -102,11 +102,10 @@ class ImageAnalyzer:
                         data=image_data,
                         mime_type="image/jpeg",
                     ),
-                    "Generate SEO-friendly alt text for this image. Keep it under 125 characters, descriptive, and professional."
+                    "You are an expert at creating SEO-friendly alt text. Generate descriptive, professional alt text for this image. Keep it under 125 characters, focus on main subject and important details. Don't start with 'Image of' or 'Picture of' - describe directly what you see."
                 ],
                 config=types.GenerateContentConfig(
-                    system_instruction=system_instruction,
-                    max_output_tokens=150,
+                    max_output_tokens=500,
                     temperature=0.3
                 )
             )
