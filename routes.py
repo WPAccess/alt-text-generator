@@ -85,6 +85,7 @@ def generate_alt_text():
         
         # Process each row
         processor = ExcelProcessor(filepath)
+        processor.read_excel()  # Initialize worksheet and columns
         analyzer = ImageAnalyzer()
         
         results = []
@@ -142,6 +143,7 @@ def download_file():
         
         # Create updated Excel file
         processor = ExcelProcessor(filepath)
+        processor.read_excel()  # Initialize worksheet and columns
         output_filename = f"updated_{filename}"
         output_path = os.path.join(app.config['TEMP_FOLDER'], output_filename)
         
