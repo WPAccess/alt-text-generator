@@ -326,6 +326,24 @@ class SimpleAltTextGenerator:
         """Start the daily scheduler"""
         schedule_time = os.environ.get('SCHEDULE_TIME', '09:00')
         
+        # Validate and fix schedule time format
+        if not schedule_time or schedule_time.lower() == 'now':
+            schedule_time = '09:00'
+        
+        # Ensure proper format (HH:MM)
+        try:
+            # Test if it's a valid time format
+            parts = schedule_time.split(':')
+            if len(parts) == 2:
+                hour, minute = parts
+                if 0 <= int(hour) <= 23 and 0 <= int(minute) <= 59:
+                    pass  # Valid format
+                else:
+                    schedule_time = '09:00'
+            else:
+                schedule_time = '09:00'
+        except (ValueError, IndexError):
+            schedule_time = '09:00'
         
         # Schedule daily check
         schedule.every().day.at(schedule_time).do(self.run_daily_check)
