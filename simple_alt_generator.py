@@ -33,7 +33,8 @@ class SimpleAltTextGenerator:
         # Initialize Gemini AI
         if self.gemini_api_key:
             genai.configure(api_key=self.gemini_api_key)
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
+            # Use the stable model version
+            self.model = genai.GenerativeModel('gemini-1.5-pro')
         
         # Initialize Google Sheets
         if self.google_credentials:
