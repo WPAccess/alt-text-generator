@@ -1,6 +1,6 @@
-# 🚀 Simple SEO Alt Text Generator
+# 🚀 SEO Alt Text Generator
 
-A minimal, automated system that connects to Google Sheets and generates SEO-friendly alt text for images using Google's Gemini AI.
+An automated system that connects to Google Sheets and generates SEO-friendly alt text for images using Google's Gemini AI.
 
 ## 🎯 What It Does
 
@@ -19,15 +19,15 @@ pip install -r requirements.txt
 ```
 
 ### 2. Setup Environment
+Create a `.env` file with your credentials:
 ```bash
-python simple_setup.py
+GEMINI_API_KEY=your_gemini_api_key_here
+GOOGLE_SHEETS_CREDENTIALS='{"type":"service_account",...}'
+SCHEDULE_TIME=09:00
 ```
-This will ask for:
-- Your Gemini API key
-- Your Google Sheets service account credentials
 
 ### 3. Add Your Sheets
-Edit `simple_config.json` and add your Google Sheet IDs:
+Edit `config.json` and add your Google Sheet IDs:
 ```json
 {
   "sheets": [
@@ -41,7 +41,7 @@ Edit `simple_config.json` and add your Google Sheet IDs:
 
 ### 4. Run the Generator
 ```bash
-python simple_alt_generator.py
+python alt_text_generator.py
 ```
 
 That's it! The system will:
@@ -72,7 +72,7 @@ GOOGLE_SHEETS_CREDENTIALS='{"type":"service_account",...}'
 SCHEDULE_TIME=09:00
 ```
 
-### Sheet Configuration (simple_config.json)
+### Sheet Configuration (config.json)
 ```json
 {
   "sheets": [
@@ -96,9 +96,8 @@ SCHEDULE_TIME=09:00
 
 ```
 ImageTextGenerator/
-├── simple_alt_generator.py    # Main application (one file!)
-├── simple_setup.py           # Setup helper
-├── simple_config.json        # Configuration
+├── alt_text_generator.py     # Main application (one file!)
+├── config.json              # Configuration
 ├── requirements.txt          # Dependencies
 ├── README.md                 # This file
 └── .env                      # Environment variables (created during setup)
@@ -146,7 +145,7 @@ The system creates logs showing:
 - Check you have sufficient API quota
 
 ### "Sheet not found"
-- Verify the sheet ID in `simple_config.json`
+- Verify the sheet ID in `config.json`
 - Ensure the sheet is shared with your service account
 
 ## 🎉 Benefits

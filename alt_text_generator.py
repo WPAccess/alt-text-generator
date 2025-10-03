@@ -184,55 +184,26 @@ class SimpleAltTextGenerator:
                 )
             )
             
-            # Debug: Check the full response structure
-            logger.info(f"Full response object: {response}")
-            logger.info(f"Response type: {type(response)}")
-            logger.info(f"Response attributes: {dir(response)}")
-            
-            # Try different ways to get the text
+            # Extract text from response
             alt_text = ""
             
-            # Check finish reason first
-            if hasattr(response, 'candidates') and response.candidates:
-                candidate = response.candidates[0]
-                finish_reason = getattr(candidate, 'finish_reason', None)
-                logger.info(f"Finish reason: {finish_reason}")
-                
-                if finish_reason and 'MAX_TOKENS' in str(finish_reason):
-                    logger.warning("Response hit MAX_TOKENS limit - may be truncated")
-            
-            # Try _get_text method first (internal method)
+            # Try _get_text method first (most reliable)
             if hasattr(response, '_get_text'):
                 try:
                     alt_text = response._get_text().strip()
-                    logger.info(f"Got text from _get_text(): '{alt_text}'")
-                except Exception as e:
-                    logger.warning(f"_get_text() failed: {e}")
+                except Exception:
+                    pass
             
-            # Try response.text (most common)
+            # Fallback to response.text
             if not alt_text and hasattr(response, 'text') and response.text:
                 alt_text = response.text.strip()
-                logger.info(f"Got text from response.text: '{alt_text}'")
-            # Try response.parts (alternative method)
-            elif not alt_text and hasattr(response, 'parts') and response.parts:
-                alt_text = response.parts[0].text.strip()
-                logger.info(f"Got text from response.parts: '{alt_text}'")
-            # Try candidates structure
-            elif not alt_text and hasattr(response, 'candidates') and response.candidates:
+            
+            # Fallback to candidates structure
+            if not alt_text and hasattr(response, 'candidates') and response.candidates:
                 candidate = response.candidates[0]
                 if hasattr(candidate, 'content') and candidate.content:
                     if hasattr(candidate.content, 'parts') and candidate.content.parts:
                         alt_text = candidate.content.parts[0].text.strip()
-                        logger.info(f"Got text from candidates.content.parts: '{alt_text}'")
-            # Try response.content (fallback)
-            elif not alt_text and hasattr(response, 'content') and response.content:
-                alt_text = response.content.strip()
-                logger.info(f"Got text from response.content: '{alt_text}'")
-            
-            # Debug: Check what we actually got from the API
-            logger.info(f"Raw API response: '{response}'")
-            logger.info(f"Processed alt text: '{alt_text}'")
-            logger.info(f"Alt text length: {len(alt_text)}")
             
             if not alt_text:
                 logger.warning("Empty alt text received from API")
@@ -262,8 +233,6 @@ class SimpleAltTextGenerator:
                 logger.warning("No updates to apply")
                 return True
             
-            logger.info(f"🔄 Updating sheet {sheet_id} with {len(updates)} updates")
-            
             batch_data = []
             for update in updates:
                 cell_range = f"{update['sheet_name']}!{self._col_letter(update['alt_col'])}{update['row']}"
@@ -271,20 +240,18 @@ class SimpleAltTextGenerator:
                     'range': cell_range,
                     'values': [[update['alt_text']]]
                 })
-                logger.info(f"Update range: {cell_range} = {update['alt_text'][:30]}...")
             
             body = {
                 'valueInputOption': 'RAW',
                 'data': batch_data
             }
             
-            logger.info(f"Sending batch update to Google Sheets...")
             self.sheets_service.spreadsheets().values().batchUpdate(
                 spreadsheetId=sheet_id,
                 body=body
             ).execute()
             
-            logger.info(f"✅ Updated {len(updates)} cells in {sheet_id}")
+            logger.info(f"✅ Updated {len(updates)} cells in sheet")
             return True
             
         except Exception as e:
@@ -327,9 +294,9 @@ class SimpleAltTextGenerator:
                     'sheet_name': cell['sheet_name']
                 }
                 updates.append(update_data)
-                logger.info(f"Added update for row {cell['row']}: {alt_text[:50]}...")
+                logger.info(f"Generated alt text for row {cell['row']}")
             else:
-                logger.warning(f"No alt text generated for row {cell['row']}")
+                logger.warning(f"Failed to generate alt text for row {cell['row']}")
         
         # Update sheet
         if updates:
@@ -357,15 +324,8 @@ class SimpleAltTextGenerator:
     
     def start_scheduler(self):
         """Start the daily scheduler"""
-        # Check if we should run immediately for testing
         schedule_time = os.environ.get('SCHEDULE_TIME', '09:00')
         
-        if schedule_time.lower() == 'now':
-            logger.info("🧪 TESTING MODE: Running immediately")
-            logger.info("🚀 Alt text generator starting...")
-            self.run_daily_check()
-            logger.info("✅ Test run completed!")
-            return
         
         # Schedule daily check
         schedule.every().day.at(schedule_time).do(self.run_daily_check)
@@ -389,7 +349,7 @@ class SimpleAltTextGenerator:
 def load_sheets_from_config():
     """Load sheets from config file"""
     try:
-        with open('simple_config.json', 'r') as f:
+        with open('config.json', 'r') as f:
             config = json.load(f)
         return config.get('sheets', [])
     except Exception as e:

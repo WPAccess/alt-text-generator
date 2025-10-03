@@ -7,7 +7,7 @@
     }
   ],
   "settings": {
-    "schedule_time": "now",
+    "schedule_time": "09:00",
     "max_alt_length": 125,
     "log_level": "INFO"
   }
