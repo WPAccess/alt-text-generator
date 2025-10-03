@@ -207,7 +207,10 @@ class SimpleAltTextGenerator:
         """Update sheet with generated alt text"""
         try:
             if not updates:
+                logger.warning("No updates to apply")
                 return True
+            
+            logger.info(f"🔄 Updating sheet {sheet_id} with {len(updates)} updates")
             
             batch_data = []
             for update in updates:
@@ -216,12 +219,14 @@ class SimpleAltTextGenerator:
                     'range': cell_range,
                     'values': [[update['alt_text']]]
                 })
+                logger.info(f"Update range: {cell_range} = {update['alt_text'][:30]}...")
             
             body = {
                 'valueInputOption': 'RAW',
                 'data': batch_data
             }
             
+            logger.info(f"Sending batch update to Google Sheets...")
             self.sheets_service.spreadsheets().values().batchUpdate(
                 spreadsheetId=sheet_id,
                 body=body
@@ -263,12 +268,16 @@ class SimpleAltTextGenerator:
             
             alt_text = self.generate_alt_text(cell['image_url'])
             if alt_text:
-                updates.append({
+                update_data = {
                     'row': cell['row'],
                     'alt_text': alt_text,
                     'alt_col': cell['alt_col'],
                     'sheet_name': cell['sheet_name']
-                })
+                }
+                updates.append(update_data)
+                logger.info(f"Added update for row {cell['row']}: {alt_text[:50]}...")
+            else:
+                logger.warning(f"No alt text generated for row {cell['row']}")
         
         # Update sheet
         if updates:
