@@ -18,7 +18,8 @@ from datetime import datetime
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -32,9 +33,7 @@ class SimpleAltTextGenerator:
         
         # Initialize Gemini AI
         if self.gemini_api_key:
-            genai.configure(api_key=self.gemini_api_key)
-            # Use the stable model version - gemini-1.5-flash is available in v1
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
+            self.gemini_client = genai.Client(api_key=self.gemini_api_key)
         
         # Initialize Google Sheets
         if self.google_credentials:
@@ -152,38 +151,42 @@ class SimpleAltTextGenerator:
             return []
     
     def generate_alt_text(self, image_url):
-        """Generate alt text using Gemini AI"""
+        """Generate alt text using Gemini AI (using working approach from original)"""
         try:
             # Download image
-            response = requests.get(image_url, timeout=10)
+            response = requests.get(image_url, timeout=30)
             response.raise_for_status()
             
-            # Generate alt text
-            prompt = """
-            Analyze this image and generate a concise, SEO-friendly alt text.
-            Requirements:
-            - Maximum 125 characters
-            - Descriptive and accurate
-            - Include relevant keywords
-            - No "image of" or "picture of" prefix
-            - Focus on the main subject and context
-            """
+            # Generate alt text using the working approach
+            system_instruction = """You are an expert at creating SEO-friendly alt text for images. 
+            Your alt text should be:
+            - Descriptive and specific
+            - Concise (under 125 characters)
+            - SEO-friendly with relevant keywords
+            - Accessible for screen readers
+            - Professional and natural sounding
             
-            # Try with the configured model first
-            try:
-                result = self.model.generate_content([prompt, {"mime_type": response.headers.get('content-type', 'image/jpeg'), "data": response.content}])
-                alt_text = result.text.strip()
-            except Exception as model_error:
-                logger.warning(f"Primary model failed: {model_error}")
-                # Try with gemini-pro as fallback
-                try:
-                    fallback_model = genai.GenerativeModel('gemini-pro')
-                    result = fallback_model.generate_content([prompt, {"mime_type": response.headers.get('content-type', 'image/jpeg'), "data": response.content}])
-                    alt_text = result.text.strip()
-                    logger.info("✅ Used fallback model (gemini-pro)")
-                except Exception as fallback_error:
-                    logger.error(f"Fallback model also failed: {fallback_error}")
-                    return None
+            Focus on the main subject, important details, context, and any text visible in the image.
+            Do not start with "Image of" or "Picture of" - just describe what you see directly."""
+            
+            response = self.gemini_client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[
+                    types.Part.from_bytes(
+                        data=response.content,
+                        mime_type="image/jpeg",
+                    ),
+                    "You are an expert at creating SEO-friendly alt text. Generate descriptive, professional alt text for this image. Keep it under 125 characters, focus on main subject and important details. Don't start with 'Image of' or 'Picture of' - describe directly what you see."
+                ],
+                config=types.GenerateContentConfig(
+                    max_output_tokens=500,
+                    temperature=0.3
+                )
+            )
+            
+            alt_text = response.text.strip() if response.text else ""
+            
+            # Ensure alt text is not too long
             if len(alt_text) > 125:
                 alt_text = alt_text[:122] + "..."
             
