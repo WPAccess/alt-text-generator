@@ -270,6 +270,7 @@ class SimpleAltTextGenerator:
         
         logger.info(f"📅 Scheduled daily check at {schedule_time}")
         logger.info("🚀 Alt text generator running...")
+        logger.info("🌐 Service is ready and monitoring sheets...")
         
         try:
             while True:
@@ -277,6 +278,11 @@ class SimpleAltTextGenerator:
                 time.sleep(60)  # Check every minute
         except KeyboardInterrupt:
             logger.info("👋 Stopping scheduler...")
+        except Exception as e:
+            logger.error(f"❌ Scheduler error: {e}")
+            logger.info("🔄 Restarting scheduler...")
+            time.sleep(10)
+            self.start_scheduler()  # Restart scheduler
 
 def load_sheets_from_config():
     """Load sheets from config file"""
@@ -294,15 +300,38 @@ def main():
     print("=" * 40)
     
     # Check required environment variables
+    missing_vars = []
+    
     if not os.environ.get('GEMINI_API_KEY'):
-        print("❌ GEMINI_API_KEY environment variable required")
-        print("Run: python simple_setup.py")
-        return
+        missing_vars.append('GEMINI_API_KEY')
     
     if not os.environ.get('GOOGLE_SHEETS_CREDENTIALS'):
-        print("❌ GOOGLE_SHEETS_CREDENTIALS environment variable required")
-        print("Run: python simple_setup.py")
-        return
+        missing_vars.append('GOOGLE_SHEETS_CREDENTIALS')
+    
+    if missing_vars:
+        print("❌ Missing required environment variables:")
+        for var in missing_vars:
+            print(f"   - {var}")
+        print("\n📋 To fix this:")
+        print("1. Add environment variables in Railway dashboard")
+        print("2. Or run locally: python simple_setup.py")
+        print("\n⏳ Service will wait for configuration...")
+        
+        # Wait for environment variables to be set
+        print("🔄 Checking for environment variables every 60 seconds...")
+        while missing_vars:
+            time.sleep(60)  # Wait 1 minute
+            missing_vars = []
+            if not os.environ.get('GEMINI_API_KEY'):
+                missing_vars.append('GEMINI_API_KEY')
+            if not os.environ.get('GOOGLE_SHEETS_CREDENTIALS'):
+                missing_vars.append('GOOGLE_SHEETS_CREDENTIALS')
+            
+            if missing_vars:
+                print(f"⏳ Still missing: {', '.join(missing_vars)}")
+            else:
+                print("✅ All environment variables found!")
+                break
     
     # Initialize generator
     generator = SimpleAltTextGenerator()
