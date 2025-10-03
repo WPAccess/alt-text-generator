@@ -186,6 +186,15 @@ class SimpleAltTextGenerator:
             
             alt_text = response.text.strip() if response.text else ""
             
+            # Debug: Check what we actually got from the API
+            logger.info(f"Raw API response: '{response.text}'")
+            logger.info(f"Processed alt text: '{alt_text}'")
+            logger.info(f"Alt text length: {len(alt_text)}")
+            
+            if not alt_text:
+                logger.warning("Empty alt text received from API")
+                return None
+            
             # Ensure alt text is not too long, but make it more natural
             if len(alt_text) > 125:
                 # Try to cut at a word boundary instead of just truncating
@@ -196,7 +205,7 @@ class SimpleAltTextGenerator:
                 else:
                     alt_text = alt_text[:122]
             
-            logger.info(f"Generated alt text: {alt_text[:50]}...")
+            logger.info(f"Final alt text: '{alt_text}'")
             return alt_text
             
         except Exception as e:
