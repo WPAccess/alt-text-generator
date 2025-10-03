@@ -326,8 +326,16 @@ class SimpleAltTextGenerator:
         """Start the daily scheduler"""
         schedule_time = os.environ.get('SCHEDULE_TIME', '09:00')
         
+        # Check if we should run immediately for testing
+        if schedule_time.lower() == 'now' or schedule_time.lower() == 'test':
+            logger.info("🧪 TESTING MODE: Running immediately")
+            logger.info("🚀 Alt text generator starting...")
+            self.run_daily_check()
+            logger.info("✅ Test run completed!")
+            return
+        
         # Validate and fix schedule time format
-        if not schedule_time or schedule_time.lower() == 'now':
+        if not schedule_time:
             schedule_time = '09:00'
         
         # Ensure proper format (HH:MM)
