@@ -33,8 +33,8 @@ class SimpleAltTextGenerator:
         # Initialize Gemini AI
         if self.gemini_api_key:
             genai.configure(api_key=self.gemini_api_key)
-            # Use the stable model version
-            self.model = genai.GenerativeModel('gemini-1.5-pro')
+            # Use the stable model version - gemini-1.5-flash is available in v1
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Initialize Google Sheets
         if self.google_credentials:
@@ -169,9 +169,21 @@ class SimpleAltTextGenerator:
             - Focus on the main subject and context
             """
             
-            result = self.model.generate_content([prompt, {"mime_type": response.headers.get('content-type', 'image/jpeg'), "data": response.content}])
-            
-            alt_text = result.text.strip()
+            # Try with the configured model first
+            try:
+                result = self.model.generate_content([prompt, {"mime_type": response.headers.get('content-type', 'image/jpeg'), "data": response.content}])
+                alt_text = result.text.strip()
+            except Exception as model_error:
+                logger.warning(f"Primary model failed: {model_error}")
+                # Try with gemini-pro as fallback
+                try:
+                    fallback_model = genai.GenerativeModel('gemini-pro')
+                    result = fallback_model.generate_content([prompt, {"mime_type": response.headers.get('content-type', 'image/jpeg'), "data": response.content}])
+                    alt_text = result.text.strip()
+                    logger.info("✅ Used fallback model (gemini-pro)")
+                except Exception as fallback_error:
+                    logger.error(f"Fallback model also failed: {fallback_error}")
+                    return None
             if len(alt_text) > 125:
                 alt_text = alt_text[:122] + "..."
             
