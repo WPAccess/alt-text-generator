@@ -179,7 +179,7 @@ class SimpleAltTextGenerator:
                     "Generate concise, SEO-friendly alt text for this image. Requirements: Maximum 120 characters, focus on main subject and key features, use descriptive keywords, no 'Image of' prefix. Be specific but brief."
                 ],
                 config=types.GenerateContentConfig(
-                    max_output_tokens=150,  # Reduced to encourage shorter responses
+                    max_output_tokens=500,  # Increased to allow proper response generation
                     temperature=0.3
                 )
             )
@@ -191,15 +191,32 @@ class SimpleAltTextGenerator:
             
             # Try different ways to get the text
             alt_text = ""
+            
+            # Check finish reason first
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                finish_reason = getattr(candidate, 'finish_reason', None)
+                logger.info(f"Finish reason: {finish_reason}")
+                
+                if finish_reason and 'MAX_TOKENS' in str(finish_reason):
+                    logger.warning("Response hit MAX_TOKENS limit - may be truncated")
+            
+            # Try response.text first (most common)
             if hasattr(response, 'text') and response.text:
                 alt_text = response.text.strip()
                 logger.info(f"Got text from response.text: '{alt_text}'")
+            # Try response.parts (alternative method)
+            elif hasattr(response, 'parts') and response.parts:
+                alt_text = response.parts[0].text.strip()
+                logger.info(f"Got text from response.parts: '{alt_text}'")
+            # Try candidates structure
             elif hasattr(response, 'candidates') and response.candidates:
                 candidate = response.candidates[0]
                 if hasattr(candidate, 'content') and candidate.content:
                     if hasattr(candidate.content, 'parts') and candidate.content.parts:
                         alt_text = candidate.content.parts[0].text.strip()
-                        logger.info(f"Got text from candidates: '{alt_text}'")
+                        logger.info(f"Got text from candidates.content.parts: '{alt_text}'")
+            # Try response.content (fallback)
             elif hasattr(response, 'content') and response.content:
                 alt_text = response.content.strip()
                 logger.info(f"Got text from response.content: '{alt_text}'")
