@@ -264,8 +264,17 @@ class SimpleAltTextGenerator:
     
     def start_scheduler(self):
         """Start the daily scheduler"""
-        # Schedule daily check at 9 AM
+        # Check if we should run immediately for testing
         schedule_time = os.environ.get('SCHEDULE_TIME', '09:00')
+        
+        if schedule_time.lower() == 'now':
+            logger.info("🧪 TESTING MODE: Running immediately")
+            logger.info("🚀 Alt text generator starting...")
+            self.run_daily_check()
+            logger.info("✅ Test run completed!")
+            return
+        
+        # Schedule daily check
         schedule.every().day.at(schedule_time).do(self.run_daily_check)
         
         logger.info(f"📅 Scheduled daily check at {schedule_time}")
