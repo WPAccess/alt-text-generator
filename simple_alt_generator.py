@@ -52,8 +52,13 @@ class SimpleAltTextGenerator:
             )
             self.sheets_service = build('sheets', 'v4', credentials=credentials)
             logger.info("✅ Google Sheets API initialized")
+        except json.JSONDecodeError as e:
+            logger.error(f"❌ Invalid JSON in GOOGLE_SHEETS_CREDENTIALS: {e}")
+            logger.error("📋 Make sure the JSON is properly formatted in Railway variables")
+            self.sheets_service = None
         except Exception as e:
             logger.error(f"❌ Google Sheets initialization failed: {e}")
+            logger.error("📋 Check your GOOGLE_SHEETS_CREDENTIALS environment variable")
             self.sheets_service = None
     
     def add_sheet(self, sheet_id, sheet_name="Sheet1"):
