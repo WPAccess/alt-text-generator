@@ -176,19 +176,25 @@ class SimpleAltTextGenerator:
                         data=response.content,
                         mime_type="image/jpeg",
                     ),
-                    "You are an expert at creating SEO-friendly alt text. Generate descriptive, professional alt text for this image. Keep it under 125 characters, focus on main subject and important details. Don't start with 'Image of' or 'Picture of' - describe directly what you see."
+                    "Generate concise, SEO-friendly alt text for this image. Requirements: Maximum 120 characters, focus on main subject and key features, use descriptive keywords, no 'Image of' prefix. Be specific but brief."
                 ],
                 config=types.GenerateContentConfig(
-                    max_output_tokens=500,
+                    max_output_tokens=150,  # Reduced to encourage shorter responses
                     temperature=0.3
                 )
             )
             
             alt_text = response.text.strip() if response.text else ""
             
-            # Ensure alt text is not too long
+            # Ensure alt text is not too long, but make it more natural
             if len(alt_text) > 125:
-                alt_text = alt_text[:122] + "..."
+                # Try to cut at a word boundary instead of just truncating
+                truncated = alt_text[:122]
+                last_space = truncated.rfind(' ')
+                if last_space > 100:  # If we can find a good word boundary
+                    alt_text = alt_text[:last_space]
+                else:
+                    alt_text = alt_text[:122]
             
             logger.info(f"Generated alt text: {alt_text[:50]}...")
             return alt_text
@@ -282,6 +288,9 @@ class SimpleAltTextGenerator:
         
         duration = (datetime.now() - start_time).total_seconds()
         logger.info(f"✅ Daily check complete: {total_processed} images processed in {duration:.1f}s")
+        if total_processed < len(blank_cells):
+            failed_count = len(blank_cells) - total_processed
+            logger.warning(f"⚠️ {failed_count} images failed to process - check logs above for details")
     
     def start_scheduler(self):
         """Start the daily scheduler"""
