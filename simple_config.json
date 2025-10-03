@@ -1,0 +1,14 @@
+{
+  "sheets": [
+    {
+      "id": "YOUR_GOOGLE_SHEET_ID_HERE",
+      "name": "Sheet1",
+      "description": "Replace with your actual Google Sheet ID"
+    }
+  ],
+  "settings": {
+    "schedule_time": "09:00",
+    "max_alt_length": 125,
+    "log_level": "INFO"
+  }
+}
