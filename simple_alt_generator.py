@@ -184,10 +184,28 @@ class SimpleAltTextGenerator:
                 )
             )
             
-            alt_text = response.text.strip() if response.text else ""
+            # Debug: Check the full response structure
+            logger.info(f"Full response object: {response}")
+            logger.info(f"Response type: {type(response)}")
+            logger.info(f"Response attributes: {dir(response)}")
+            
+            # Try different ways to get the text
+            alt_text = ""
+            if hasattr(response, 'text') and response.text:
+                alt_text = response.text.strip()
+                logger.info(f"Got text from response.text: '{alt_text}'")
+            elif hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and candidate.content:
+                    if hasattr(candidate.content, 'parts') and candidate.content.parts:
+                        alt_text = candidate.content.parts[0].text.strip()
+                        logger.info(f"Got text from candidates: '{alt_text}'")
+            elif hasattr(response, 'content') and response.content:
+                alt_text = response.content.strip()
+                logger.info(f"Got text from response.content: '{alt_text}'")
             
             # Debug: Check what we actually got from the API
-            logger.info(f"Raw API response: '{response.text}'")
+            logger.info(f"Raw API response: '{response}'")
             logger.info(f"Processed alt text: '{alt_text}'")
             logger.info(f"Alt text length: {len(alt_text)}")
             
