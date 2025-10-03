@@ -253,9 +253,14 @@ class SimpleAltTextGenerator:
             logger.info("No blank cells found")
             return 0
         
-        # Generate alt text for each blank cell
+        # Generate alt text for each blank cell with rate limiting
         updates = []
-        for cell in blank_cells:
+        for i, cell in enumerate(blank_cells):
+            # Add delay between requests to avoid rate limiting (2 seconds)
+            if i > 0:
+                logger.info(f"Waiting 2 seconds to avoid rate limiting...")
+                time.sleep(2)
+            
             alt_text = self.generate_alt_text(cell['image_url'])
             if alt_text:
                 updates.append({
@@ -288,9 +293,6 @@ class SimpleAltTextGenerator:
         
         duration = (datetime.now() - start_time).total_seconds()
         logger.info(f"✅ Daily check complete: {total_processed} images processed in {duration:.1f}s")
-        if total_processed < len(blank_cells):
-            failed_count = len(blank_cells) - total_processed
-            logger.warning(f"⚠️ {failed_count} images failed to process - check logs above for details")
     
     def start_scheduler(self):
         """Start the daily scheduler"""
