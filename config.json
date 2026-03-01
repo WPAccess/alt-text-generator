@@ -1,9 +1,9 @@
 {
   "sheets": [
     {
-      "id": "1VSheoQyIRSpU4lfCj0cCIZ-j2UlStTGP3B3v5zBvqZ8",
+      "id": "YOUR_GOOGLE_SHEET_ID_HERE",
       "name": "Sheet1",
-      "description": "Test sheet for alt text generation"
+      "description": "Primary sheet for alt text generation"
     }
   ],
   "settings": {

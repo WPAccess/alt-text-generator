@@ -402,7 +402,7 @@ def main():
             print(f"   - {var}")
         print("\n📋 To fix this:")
         print("1. Add environment variables in Railway dashboard")
-        print("2. Or run locally: python simple_setup.py")
+        print("2. Or set them in a local .env before running")
         print("\n⏳ Service will wait for configuration...")
         
         # Wait for environment variables to be set
@@ -427,8 +427,8 @@ def main():
     # Load sheets from config file
     sheets = load_sheets_from_config()
     if not sheets:
-        print("⚠️ No sheets configured in simple_config.json")
-        print("Edit simple_config.json or run: python simple_setup.py")
+        print("⚠️ No sheets configured in config.json")
+        print("Edit config.json and add at least one sheet entry")
         return
     
     # Add sheets to generator
